@@ -3,10 +3,14 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginUserDto } from './dto/login-user.dto';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
   async login(params: LoginUserDto) {
     let user = await this.userService.findOne({ email: params.email }, [
@@ -27,9 +31,11 @@ export class AuthService {
       );
     }
 
+    let token = this.jwtService.sign({ userId: user.id });
+
     return {
       status: true,
-      user: await this.userService.findOne({ id: user.id }),
+      token,
     };
   }
 
