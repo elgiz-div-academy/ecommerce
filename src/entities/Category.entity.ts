@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { CommonEntity } from './Common.entity';
 import { Product } from './Product.entity';
 
@@ -8,5 +8,6 @@ export class Category extends CommonEntity {
   name: string;
 
   @ManyToMany(() => Product, (product) => product.categories)
+  @JoinTable()
   products: Product[];
 }

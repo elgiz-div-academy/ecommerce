@@ -2,12 +2,14 @@ import { Column, Entity, ManyToMany } from 'typeorm';
 import { CommonEntity } from './Common.entity';
 import { Category } from './Category.entity';
 
+export type ProductKey = keyof Product;
+
 @Entity()
 export class Product extends CommonEntity {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ type: 'float' })
   price: number;
 
   @Column()
@@ -17,5 +19,5 @@ export class Product extends CommonEntity {
   image: string;
 
   @ManyToMany(() => Category, (category) => category.products)
-  categories: Category[];
+  categories: Partial<Category>[];
 }
