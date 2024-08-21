@@ -13,8 +13,8 @@ export class CategoryService {
   ) {}
 
   find(params?: FindCategoryParams) {
-    const { where, select } = params || {};
-    return this.categoryRepo.find({ where, select });
+    const { where, select, relations } = params || {};
+    return this.categoryRepo.find({ where, select, relations });
   }
 
   findByIds(ids: number[]) {

@@ -1,7 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/entities/Product.entity';
-import { In, Repository } from 'typeorm';
+import {
+  ILike,
+  Repository,
+  Between,
+  MoreThanOrEqual,
+  LessThanOrEqual,
+  And,
+} from 'typeorm';
 import { FindProductParams } from './product.types';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -16,18 +23,58 @@ export class ProductService {
   ) {}
 
   async find(params?: FindProductParams) {
-    let { where, select } = params || {};
-    return this.productRepo.find({ where, select, relations: ['categories'] });
+    let { where, select, relations, filter, pagination } = params || {};
+
+    if (!where) where = {};
+    if (filter) {
+      if (filter.name) {
+        where.name = ILike(`%${filter.name}%`);
+      }
+
+      if (filter.price) {
+        const [min, max] = filter.price;
+        let price = [];
+        if (min > 0) {
+          price.push(MoreThanOrEqual(min));
+        }
+        if (max > 0) {
+          price.push(LessThanOrEqual(max));
+        }
+        if (price.length) {
+          where.price = And(...price);
+        }
+      }
+
+      if (filter.categories) {
+        where.categories = filter.categories.map((categoryId) => {
+          return {
+            id: categoryId,
+          };
+        });
+      }
+    }
+
+    return this.productRepo.find({
+      where,
+      select,
+      relations,
+      take: pagination?.limit,
+      skip: pagination && pagination.limit * pagination.page,
+      order: {
+        updatedAt: 'DESC',
+      },
+    });
   }
-  async findOne({ where, select }: FindProductParams = {}) {
+  async findOne({ where, select, relations }: FindProductParams = {}) {
     return this.productRepo.findOne({
       where,
       select,
-      relations: ['categories'],
+      relations,
     });
   }
   async create(params: CreateProductDto) {
-    let product = this.productRepo.create(params);
+    const categories = await this.categoryService.findByIds(params.categories);
+    let product = this.productRepo.create({ ...params, categories });
     await product.save();
 
     return product;
