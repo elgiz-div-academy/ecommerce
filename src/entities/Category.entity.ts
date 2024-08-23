@@ -7,7 +7,9 @@ export class Category extends CommonEntity {
   @Column()
   name: string;
 
-  @ManyToMany(() => Product, (product) => product.categories, { cascade: true })
-  @JoinTable()
+  @ManyToMany(() => Product, (product) => product.categories)
+  @JoinTable({
+    name: 'category_product',
+  })
   products: Product[];
 }

@@ -1,6 +1,7 @@
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import { CommonEntity } from './Common.entity';
 import * as bcrypt from 'bcrypt';
+import { Order } from './Order.entity';
 
 export type UserKey = keyof User;
 
@@ -17,6 +18,9 @@ export class User extends CommonEntity {
 
   @Column()
   lastName: string;
+
+  @OneToMany(() => Order, (order) => order.user, { onDelete: 'CASCADE' })
+  orders: Order[];
 
   @BeforeInsert()
   async beforeInsert() {

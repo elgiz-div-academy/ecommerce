@@ -19,7 +19,7 @@ export class CategoryController {
 
   @Get()
   list() {
-    return this.categoryService.find({ relations: ['products'] });
+    return this.categoryService.find();
   }
 
   @Get(':id')
