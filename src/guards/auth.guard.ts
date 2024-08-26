@@ -4,11 +4,18 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+import { UserRoles } from 'src/common/enum/user-roles.enum';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private userService: UserService,
+    private reflector: Reflector,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
@@ -19,9 +26,21 @@ export class AuthGuard implements CanActivate {
     token = token.split(' ')[1];
     try {
       let payload = await this.jwtService.verify(token);
-      if (!payload) throw new UnauthorizedException();
+      if (!payload) throw new Error();
 
-      req.userId = payload.userId;
+      let user = await this.userService.findOne({ id: payload.userId });
+
+      if (!user) throw new Error();
+
+      let roles = this.reflector.get('roles', context.getHandler());
+      if (roles && !user.roles.includes(UserRoles.ADMIN)) {
+        let checkRoles = roles.find((role) => user.roles?.includes(role));
+        if (!checkRoles) {
+          throw new Error();
+        }
+      }
+
+      req.user = user;
     } catch {
       throw new UnauthorizedException();
     }
