@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { extname, join } from 'path';
 
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
@@ -11,6 +12,10 @@ import { ProfileModule } from './profile/profile.module';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
 import { OrderModule } from './order/order.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { UploadModule } from './upload/upload.module';
+import { diskStorage } from 'multer';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
@@ -25,8 +30,12 @@ import { OrderModule } from './order/order.module';
       entities: [`${__dirname}/**/*.entity.{ts,js}`],
       migrations: [`${__dirname}/**/migrations/*.js`],
       migrationsRun: true,
-      synchronize: process.env.NODE_ENV === 'development' ? true : false,
+      synchronize: true,
       logging: true,
+    }),
+    ServeStaticModule.forRoot({
+      serveRoot: '/uploads',
+      rootPath: join(__dirname, '../uploads'),
     }),
     UserModule,
     AuthModule,
@@ -34,6 +43,7 @@ import { OrderModule } from './order/order.module';
     ProductModule,
     CategoryModule,
     OrderModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

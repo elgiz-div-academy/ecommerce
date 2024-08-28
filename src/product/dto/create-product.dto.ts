@@ -34,9 +34,8 @@ export class CreateProductDto {
 
   @Type()
   @ApiProperty()
-  @IsString()
-  @IsUrl()
-  image: string;
+  @IsNumber({}, { each: true })
+  images: number[];
 
   @Type()
   @IsNumber({}, { each: true })

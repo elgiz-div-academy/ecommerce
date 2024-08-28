@@ -74,7 +74,8 @@ export class ProductService {
   }
   async create(params: CreateProductDto) {
     const categories = await this.categoryService.findByIds(params.categories);
-    let product = this.productRepo.create({ ...params, categories });
+    const images = params.images.map((id) => ({ id }));
+    let product = this.productRepo.create({ ...params, categories, images });
     await product.save();
 
     return product;
@@ -88,6 +89,8 @@ export class ProductService {
         product.categories = await this.categoryService.findByIds(
           params.categories,
         );
+      } else if (key === 'images') {
+        product.images = params.images.map((id) => ({ id }));
       } else {
         product[key] = params[key];
       }
