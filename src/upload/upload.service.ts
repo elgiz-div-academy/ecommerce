@@ -4,7 +4,7 @@ import { Request } from 'express';
 import { rmSync } from 'fs';
 import { join } from 'path';
 import { ImageEntity } from 'src/entities/Image.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class UploadService {
@@ -28,5 +28,9 @@ export class UploadService {
     let image = await this.imageRepo.findOne({ where: { id } });
     if (!image) throw new NotFoundException();
     return await image.remove();
+  }
+
+  async deleteImages(images: ImageEntity[]) {
+    return await this.imageRepo.remove(images);
   }
 }
